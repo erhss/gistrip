@@ -29,6 +29,20 @@ Open [http://localhost:3000](http://localhost:3000).
 
 The access key is hardcoded in `src/components/SubscribeForm.tsx`. Web3Forms keys are designed to be public, so this is fine. To change it, replace the `WEB3FORMS_KEY` constant.
 
-## Deploying
+## Deploying to OVH (static)
 
-Hosted on OVH. Build with `npm run build`, then either run `npm start` (Node hosting) or run a static export and rsync `out/` to the OVH webroot. No env vars required.
+`next.config.mjs` is set to `output: "export"`, so the project builds to a flat static folder.
+
+```bash
+npm install
+npm run build       # writes ./out/
+```
+
+Upload the **contents** of `out/` to the OVH webroot (typically `www/` over FTP/SFTP, or rsync to the server). No Node runtime needed; no env vars required.
+
+```bash
+# Example rsync deploy
+rsync -avz --delete out/ user@host:/home/user/www/
+```
+
+If you serve under a subpath (e.g. `gistrip.com/preview`) instead of the apex, also set `basePath: "/preview"` in `next.config.mjs` and rebuild.
