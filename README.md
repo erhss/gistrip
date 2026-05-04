@@ -2,47 +2,29 @@
 
 > Plan the route. Live the trip.
 
-Coming-soon page for GisTrip. A trip planner that lives on the map.
+Coming-soon page for gistrip.com. A single hand-written `index.html` (plus a favicon). No build step, no framework, no dependencies.
 
-## Tech stack
+## Files
 
-- Next.js 14 (App Router, TypeScript)
-- Tailwind CSS
-- Web3Forms for email signups (submissions forwarded to your registered email)
+- `index.html` — the page (HTML + CSS + JS all inline)
+- `favicon.svg` — the icon
 
-No database. No server routes. The form posts directly to Web3Forms from the browser. Visit analytics are handled by the host (OVH).
+## Run locally
 
-## Getting started
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## What's here
-
-- `/` is the entire site: logo, tagline, email signup. The form posts directly to `https://api.web3forms.com/submit` with the access key embedded in `src/components/SubscribeForm.tsx`.
-
-## Changing the Web3Forms key
-
-The access key is hardcoded in `src/components/SubscribeForm.tsx`. Web3Forms keys are designed to be public, so this is fine. To change it, replace the `WEB3FORMS_KEY` constant.
-
-## Deploying to OVH (static)
-
-`next.config.mjs` is set to `output: "export"`, so the project builds to a flat static folder.
+Any static server will do. Easiest:
 
 ```bash
-npm install
-npm run build       # writes ./out/
+npx serve .
 ```
 
-Upload the **contents** of `out/` to the OVH webroot (typically `www/` over FTP/SFTP, or rsync to the server). No Node runtime needed; no env vars required.
+…then open the URL it prints.
 
-```bash
-# Example rsync deploy
-rsync -avz --delete out/ user@host:/home/user/www/
-```
+## Deploy
 
-If you serve under a subpath (e.g. `gistrip.com/preview`) instead of the apex, also set `basePath: "/preview"` in `next.config.mjs` and rebuild.
+FTP `index.html` and `favicon.svg` to your OVH webroot.
+
+## Email signups
+
+The form posts directly from the browser to [Web3Forms](https://web3forms.com). The access key is hardcoded in the inline script in `index.html` (search for `ACCESS_KEY`). Web3Forms keys are designed to be public; submissions are forwarded to the email registered on that key.
+
+After a successful signup, the form is replaced with a "you're in" card and the state is persisted in `localStorage` under `gt_subscribed`, so the same browser can't keep submitting.

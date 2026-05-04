@@ -1,13 +1,3 @@
-node_modules/
-.env
-.env.local
-.env.production.local
-dist/
-.next/
-out/
-.turbo/
-*.log
-*.tsbuildinfo
 .DS_Store
+*.log
 .claude/
-data/
