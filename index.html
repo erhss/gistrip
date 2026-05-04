@@ -40,14 +40,18 @@
       position: relative;
       overflow-x: hidden;
     }
+
+    /* ---------------- Background layers ---------------- */
     .bg {
-      position: absolute;
+      position: fixed;
       inset: 0;
       pointer-events: none;
       overflow: hidden;
       z-index: 0;
     }
-    .bg svg {
+
+    /* Topographic contour — slow drift */
+    .contours {
       position: absolute;
       bottom: -10rem;
       right: -10rem;
@@ -61,61 +65,199 @@
       0%   { transform: translate3d(0, 0, 0) scale(1.6); }
       100% { transform: translate3d(-40px, -24px, 0) scale(1.6); }
     }
-    @media (prefers-reduced-motion: reduce) {
-      .bg svg { animation: none; }
+
+    /* Animated route line that draws itself across the page */
+    .route-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
+    .route-path-1 {
+      stroke-dasharray: 2400;
+      stroke-dashoffset: 2400;
+      animation: draw1 14s ease-in-out infinite;
+    }
+    .route-path-2 {
+      stroke-dasharray: 2400;
+      stroke-dashoffset: 2400;
+      animation: draw2 18s ease-in-out infinite;
+      animation-delay: 4s;
+    }
+    @keyframes draw1 {
+      0%   { stroke-dashoffset: 2400; }
+      45%  { stroke-dashoffset: 0; }
+      85%  { stroke-dashoffset: -2400; }
+      100% { stroke-dashoffset: -2400; }
+    }
+    @keyframes draw2 {
+      0%   { stroke-dashoffset: 2400; }
+      50%  { stroke-dashoffset: 0; }
+      90%  { stroke-dashoffset: -2400; }
+      100% { stroke-dashoffset: -2400; }
+    }
+
+    /* Floating waypoint dots, each with its own pulse ring + drift */
+    .waypoint {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 9999px;
+      pointer-events: none;
+    }
+    .waypoint::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      border: 1px solid currentColor;
+      opacity: 0.5;
+      animation: ping 3.4s ease-out infinite;
+    }
+    @keyframes ping {
+      0%   { transform: scale(1);   opacity: 0.5; }
+      100% { transform: scale(5);   opacity: 0; }
+    }
+    .w1 { top: 16%;  left: 9%;  color: var(--moss);  background: var(--moss);  animation: float1 22s ease-in-out infinite; opacity: 0.65; }
+    .w2 { top: 72%;  left: 80%; color: var(--coral); background: var(--coral); animation: float2 28s ease-in-out infinite; opacity: 0.55; }
+    .w3 { top: 38%;  left: 88%; color: var(--moss);  background: var(--moss);  animation: float3 26s ease-in-out infinite; opacity: 0.55; }
+    .w4 { top: 82%;  left: 18%; color: var(--coral); background: var(--coral); animation: float4 32s ease-in-out infinite; opacity: 0.5; }
+    .w5 { top: 25%;  left: 55%; color: var(--moss);  background: var(--moss);  animation: float5 24s ease-in-out infinite; opacity: 0.4; }
+    .w5::after { animation-delay: 1.4s; }
+    .w2::after { animation-delay: 0.8s; }
+    .w3::after { animation-delay: 2.1s; }
+    .w4::after { animation-delay: 1.7s; }
+
+    @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(50px, -34px); } }
+    @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-60px, 24px); } }
+    @keyframes float3 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-36px, 48px); } }
+    @keyframes float4 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(44px, -28px); } }
+    @keyframes float5 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(28px, 36px); } }
+
+    /* Soft drifting glow orbs for depth */
+    .orb {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(70px);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 520px; height: 520px;
+      background: var(--moss);
+      top: -120px; left: -160px;
+      animation: orb-float-1 28s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 620px; height: 620px;
+      background: var(--coral);
+      bottom: -180px; right: -200px;
+      animation: orb-float-2 34s ease-in-out infinite alternate;
+    }
+    @keyframes orb-float-1 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(60px, 80px); }
+    }
+    @keyframes orb-float-2 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-80px, -60px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .contours, .route-path-1, .route-path-2,
+      .waypoint, .orb {
+        animation: none !important;
+      }
+      .waypoint::after { animation: none !important; }
+    }
+
+    /* ---------------- Layout ---------------- */
     .container {
       position: relative;
       z-index: 1;
-      max-width: 56rem;
+      max-width: 90rem;
       margin: 0 auto;
-      padding: 2.5rem 1.5rem;
+      padding: 2rem 1.5rem 2.5rem;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
+    @media (min-width: 768px) { .container { padding: 3rem 3rem 3rem; } }
+    @media (min-width: 1280px) { .container { padding: 3.5rem 5rem 3.5rem; } }
+
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+
+    /* Coming-soon pill with live pulse dot */
     .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       border: 1px solid rgba(255,255,255,0.1);
       background: rgba(15,42,51,0.7);
       backdrop-filter: blur(4px);
-      padding: 0.25rem 0.75rem;
+      padding: 0.3rem 0.8rem 0.3rem 0.7rem;
       border-radius: 9999px;
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.2em;
       color: var(--dust);
     }
+    .live-dot {
+      position: relative;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 9999px;
+      background: var(--moss);
+      flex-shrink: 0;
+    }
+    .live-dot::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      background: var(--moss);
+      animation: live-pulse 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes live-pulse {
+      0%   { transform: scale(1);   opacity: 0.7; }
+      80%  { transform: scale(2.6); opacity: 0; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .live-dot::before { animation: none; }
+    }
+
+    /* Hero — fills the viewport */
     .hero {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 4rem 0;
+      padding: 2.5rem 0;
     }
+    @media (min-width: 1024px) { .hero { padding: 4rem 0; } }
+
     .eyebrow {
       font-size: 0.875rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.25em;
       color: var(--moss);
-      margin: 0 0 1.25rem;
+      margin: 0 0 1.5rem;
     }
     h1 {
       margin: 0;
       font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
-      font-size: 3rem;
       font-weight: 600;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
+      line-height: 1.02;
+      letter-spacing: -0.025em;
       text-wrap: balance;
+      font-size: clamp(2.75rem, 9vw, 9rem);
     }
-    @media (min-width: 640px) { h1 { font-size: 3.75rem; } }
-    @media (min-width: 768px) { h1 { font-size: 4.5rem; } }
     .gradient {
       background: linear-gradient(90deg, var(--moss) 0%, var(--coral) 100%);
       -webkit-background-clip: text;
@@ -123,16 +265,18 @@
       color: transparent;
     }
     .lead {
-      margin: 1.5rem 0 0;
-      max-width: 36rem;
-      font-size: 1.125rem;
+      margin: 1.75rem 0 0;
+      max-width: 40rem;
+      font-size: clamp(1.05rem, 1.4vw, 1.35rem);
       line-height: 1.6;
       color: var(--dust);
     }
-    .form-wrap { margin-top: 2.5rem; }
+
+    /* Form */
+    .form-wrap { margin-top: 3rem; }
     form {
       width: 100%;
-      max-width: 28rem;
+      max-width: 30rem;
     }
     .row {
       display: flex;
@@ -144,9 +288,10 @@
       flex: 1;
       min-width: 0;
       border: 1px solid rgba(255,255,255,0.1);
-      background: var(--deepwater);
+      background: rgba(15,42,51,0.85);
+      backdrop-filter: blur(4px);
       border-radius: 0.5rem;
-      padding: 0.75rem 1rem;
+      padding: 0.85rem 1rem;
       font: inherit;
       font-size: 0.9375rem;
       color: var(--sand);
@@ -165,13 +310,13 @@
       font: inherit;
       font-size: 0.9375rem;
       font-weight: 600;
-      padding: 0.75rem 1.25rem;
+      padding: 0.85rem 1.4rem;
       border-radius: 0.5rem;
       cursor: pointer;
-      transition: filter 0.15s;
+      transition: filter 0.15s, transform 0.15s;
     }
     button:hover { filter: brightness(1.1); }
-    button:active { filter: brightness(0.95); }
+    button:active { transform: translateY(1px); }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     .botcheck { display: none !important; }
     .sr-only {
@@ -191,9 +336,10 @@
     .message.error { color: var(--coral); }
     .success-card {
       width: 100%;
-      max-width: 28rem;
+      max-width: 30rem;
       border: 1px solid rgba(61,220,151,0.3);
-      background: var(--deepwater);
+      background: rgba(15,42,51,0.85);
+      backdrop-filter: blur(4px);
       border-radius: 0.5rem;
       padding: 1rem 1.25rem;
     }
@@ -206,6 +352,7 @@
       font-size: 0.875rem;
       color: var(--dust);
     }
+
     footer {
       display: flex;
       flex-direction: column;
@@ -227,7 +374,10 @@
 <body>
 
   <div class="bg" aria-hidden="true">
-    <svg viewBox="0 0 800 800" preserveAspectRatio="xMaxYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <svg class="contours" viewBox="0 0 800 800" preserveAspectRatio="xMaxYMax slice" xmlns="http://www.w3.org/2000/svg">
       <g fill="none" stroke="#3DDC97" stroke-width="1" stroke-opacity="0.04" stroke-linejoin="round">
         <path d="M120 700 C 220 660, 320 700, 420 640 S 640 540, 760 580 L 800 800 L 0 800 Z"/>
         <path d="M80 640 C 200 580, 340 640, 460 560 S 660 460, 800 500"/>
@@ -239,6 +389,23 @@
       </g>
       <circle cx="500" cy="460" r="4" fill="#FF6B5B" fill-opacity="0.3"/>
     </svg>
+
+    <svg class="route-layer" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <path class="route-path-1"
+            d="M -80 720 C 240 600, 380 820, 600 700 S 980 460, 1240 560 S 1620 660, 1700 600"
+            fill="none" stroke="#3ddc97" stroke-width="1.5" stroke-opacity="0.18"
+            stroke-linecap="round"/>
+      <path class="route-path-2"
+            d="M 1700 220 C 1400 300, 1240 160, 980 280 S 600 480, 360 380 S 60 280, -100 340"
+            fill="none" stroke="#ff6b5b" stroke-width="1.2" stroke-opacity="0.14"
+            stroke-linecap="round"/>
+    </svg>
+
+    <span class="waypoint w1"></span>
+    <span class="waypoint w2"></span>
+    <span class="waypoint w3"></span>
+    <span class="waypoint w4"></span>
+    <span class="waypoint w5"></span>
   </div>
 
   <div class="container">
@@ -251,13 +418,16 @@
         </g>
         <text x="72" y="42" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="28" font-weight="600" fill="#F4EAD5" letter-spacing="-0.5">Gis<tspan fill="#FF6B5B">Trip</tspan></text>
       </svg>
-      <span class="pill">Coming soon</span>
+      <span class="pill">
+        <span class="live-dot" aria-hidden="true"></span>
+        Coming soon
+      </span>
     </header>
 
     <section class="hero">
       <p class="eyebrow">GisTrip · 2026</p>
       <h1>Plan the route.<br/><span class="gradient">Live the trip.</span></h1>
-      <p class="lead">A trip planner that lives on the map. Plan routes with your group, see everyone&rsquo;s edits, skip the Google Doc.</p>
+      <p class="lead">Every detour worth taking, on one shared map.</p>
 
       <div class="form-wrap" id="form-wrap">
         <form id="signup" novalidate>
