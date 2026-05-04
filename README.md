@@ -1,32 +1,34 @@
 # GisTrip
 
-A GIS-first trip planning platform that combines spatial intelligence with AI-powered itinerary planning.
+> Plan the route. Live the trip.
 
-## Vision
+Coming-soon page for GisTrip. A trip planner that lives on the map.
 
-Build a map-centric travel planner that goes beyond simple pin-dropping — leveraging PostGIS spatial queries, route optimization, and multi-agent AI to create intelligent, adaptive trip itineraries.
+## Tech stack
 
-## Planned Tech Stack
+- Next.js 14 (App Router, TypeScript)
+- Tailwind CSS
+- Web3Forms for email signups (submissions forwarded to your registered email)
 
-- **Frontend:** Next.js 15 (App Router), Tailwind CSS, shadcn/ui
-- **Maps:** Mapbox GL JS via react-map-gl
-- **Database:** PostgreSQL + PostGIS (Supabase)
-- **ORM:** Drizzle
-- **Auth:** NextAuth.js
-- **AI:** Claude (Anthropic) via Vercel AI SDK, LangGraph for multi-agent orchestration
+No database. No server routes. The form posts directly to Web3Forms from the browser. Visit analytics are handled by the host (OVH).
 
-## Roadmap
+## Getting started
 
-- **Phase 1 — MVP:** Trip creation, map stops, drag-reorder, route visualization
-- **Phase 2 — Core:** Multi-day itineraries, POI search, collaboration, budget tracking, offline
-- **Phase 3 — AI Copilot:** Chat-based trip planning, smart suggestions, route optimization
-- **Phase 4 — Multi-Agent:** Specialized AI agents (researcher, logistics, budget, weather) with LangGraph
-- **Phase 5 — Platform:** Mobile app, marketplace, social features, booking integrations
+```bash
+npm install
+npm run dev
+```
 
-## Status
+Open [http://localhost:3000](http://localhost:3000).
 
-Early development — project scaffolding in progress.
+## What's here
 
-## License
+- `/` is the entire site: logo, tagline, email signup. The form posts directly to `https://api.web3forms.com/submit` with the access key embedded in `src/components/SubscribeForm.tsx`.
 
-MIT
+## Changing the Web3Forms key
+
+The access key is hardcoded in `src/components/SubscribeForm.tsx`. Web3Forms keys are designed to be public, so this is fine. To change it, replace the `WEB3FORMS_KEY` constant.
+
+## Deploying
+
+Hosted on OVH. Build with `npm run build`, then either run `npm start` (Node hosting) or run a static export and rsync `out/` to the OVH webroot. No env vars required.
